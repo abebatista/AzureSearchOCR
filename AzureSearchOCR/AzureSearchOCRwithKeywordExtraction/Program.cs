@@ -53,7 +53,7 @@ namespace AzureSearchOCRwithKeywordExtraction
         static string searchServiceAPIKey = ConfigurationManager.AppSettings["searchServiceAPIKey"];
         static string indexName = "ocrtest";
         static SearchServiceClient serviceClient = new SearchServiceClient(searchServiceName, new SearchCredentials(searchServiceAPIKey));
-        static SearchIndexClient indexClient = serviceClient.Indexes.GetClient(indexName);
+        static SearchIndexClient indexClient = serviceClient.Indexes.GetClient(indexName) as SearchIndexClient;
         static VisionHelper vision = new VisionHelper(oxfordSubscriptionKey);
 
         static void Main(string[] args)

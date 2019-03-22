@@ -9,9 +9,10 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>AzureSearchOCR</RootNamespace>
     <AssemblyName>AzureSearchOCR</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <NuGetPackageImportStamp>e47e02a0</NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -33,29 +34,44 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="itextsharp">
-      <HintPath>..\packages\iTextSharp.5.5.8\lib\itextsharp.dll</HintPath>
+    <Reference Include="cs-pdf-to-image, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Pdf2Png.1.0.2\lib\net452\Release\cs-pdf-to-image.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Azure.Search, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Azure.Search.1.1.1\lib\net45\Microsoft.Azure.Search.dll</HintPath>
+    <Reference Include="Ghostscript.NET, Version=1.2.1.0, Culture=neutral, PublicKeyToken=f85051de34525b59, processorArchitecture=MSIL">
+      <HintPath>..\packages\Ghostscript.NET.1.2.1\lib\net40\Ghostscript.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp, Version=5.5.13.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\iTextSharp.5.5.13\lib\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Azure.Search, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Azure.Search.5.0.3\lib\net452\Microsoft.Azure.Search.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Azure.Search.Common, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Azure.Search.Common.5.0.3\lib\net452\Microsoft.Azure.Search.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Azure.Search.Data, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Azure.Search.Data.5.0.3\lib\net452\Microsoft.Azure.Search.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Azure.Search.Service, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Azure.Search.Service.5.0.3\lib\net452\Microsoft.Azure.Search.Service.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.ProjectOxford.Vision">
       <HintPath>..\packages\Microsoft.ProjectOxford.Vision.0.5.0.1\lib\portable-net45+dnxcore50+wp80\Microsoft.ProjectOxford.Vision.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Rest.ClientRuntime">
-      <HintPath>..\packages\Microsoft.Rest.ClientRuntime.1.8.1\lib\net45\Microsoft.Rest.ClientRuntime.dll</HintPath>
+    <Reference Include="Microsoft.Rest.ClientRuntime, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Rest.ClientRuntime.2.3.20\lib\net461\Microsoft.Rest.ClientRuntime.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Rest.ClientRuntime.Azure">
-      <HintPath>..\packages\Microsoft.Rest.ClientRuntime.Azure.2.5.2\lib\net45\Microsoft.Rest.ClientRuntime.Azure.dll</HintPath>
+    <Reference Include="Microsoft.Rest.ClientRuntime.Azure, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Rest.ClientRuntime.Azure.3.3.19\lib\net461\Microsoft.Rest.ClientRuntime.Azure.dll</HintPath>
     </Reference>
-    <Reference Include="Microsoft.Spatial, Version=6.15.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Microsoft.Spatial.6.15.0-beta\lib\portable-net40+sl5+wp8+win8+wpa\Microsoft.Spatial.dll</HintPath>
+    <Reference Include="Microsoft.Spatial, Version=7.5.4.30215, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Spatial.7.5.4\lib\portable-net45+win8+wpa81\Microsoft.Spatial.dll</HintPath>
     </Reference>
-    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.12.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="SolidFramework, Version=8.2.4035.1, Culture=neutral, PublicKeyToken=d16bc61c9431f4ad, processorArchitecture=AMD64">
+      <HintPath>..\packages\SolidFramework.1.0.0\lib\SolidFramework.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -64,11 +80,19 @@
     <Reference Include="System.Net" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Net.Http.WebRequest" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="Xfinium.Pdf.NetStandard, Version=8.4.1.0, Culture=neutral, PublicKeyToken=3a083ecebc95eb1c, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xfinium.Pdf.NetStandard.8.4.1.0\lib\netstandard2.0\Xfinium.Pdf.NetStandard.dll</HintPath>
+    </Reference>
+    <Reference Include="Xfinium.Pdf.Render.NetStandard, Version=8.4.1.0, Culture=neutral, PublicKeyToken=148fa7b1dc392cc9, processorArchitecture=MSIL">
+      <HintPath>..\packages\Xfinium.Pdf.Render.NetStandard.8.4.1.0\lib\netstandard2.0\Xfinium.Pdf.Render.NetStandard.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AzureSearch.cs" />
