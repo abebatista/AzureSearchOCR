@@ -53,12 +53,18 @@ using System;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Diagnostics;
+using System;
+using System.Net.Http.Headers;
+using System.Text;
+using System.Net.Http;
+using System.Web;
+using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace AzureSearchOCR
 {
     class Program
     {
-        /*
         static string oxfordSubscriptionKey = ConfigurationManager.AppSettings["oxfordSubscriptionKey"];
         static string searchServiceName = ConfigurationManager.AppSettings["searchServiceName"];
         static string searchServiceAPIKey = ConfigurationManager.AppSettings["searchServiceAPIKey"];
@@ -66,7 +72,21 @@ namespace AzureSearchOCR
         static SearchServiceClient serviceClient = new SearchServiceClient(searchServiceName, new SearchCredentials(searchServiceAPIKey));
         static SearchIndexClient indexClient = serviceClient.Indexes.GetClient(indexName) as SearchIndexClient;
         static VisionHelper vision = new VisionHelper(oxfordSubscriptionKey);
-        */
+
+
+        // Replace <Subscription Key> with your valid subscription key.
+        const string subscriptionKey = "0859d36e0a604c2296438eac1fe430ab";
+
+        // You must use the same Azure region in your REST API method as you used to
+        // get your subscription keys. For example, if you got your subscription keys
+        // from the West US region, replace "westcentralus" in the URL
+        // below with "westus".
+        //
+        // Free trial subscription keys are generated in the "westus" region.
+        // If you use a free trial subscription key, you shouldn't need to change
+        // this region.
+        const string uriBase =
+            "https://eastus.api.cognitive.microsoft.com/vision/v2.0/ocr";
 
         private static void CreateImageFromPage(SolidFramework.Pdf.Plumbing.PdfPage page, int dpi, string filename, int pageIndex, string extension, System.Drawing.Imaging.ImageFormat format)
         {
@@ -173,50 +193,204 @@ namespace AzureSearchOCR
             }
         }
 
+        static async Task<string> MakeRequest(string fileName)
+        {
+            var client = new HttpClient();
+
+            // Request headers
+            client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", "0859d36e0a604c2296438eac1fe430ab");
+
+            // Request parameters
+            var uri = "https://eastus.api.cognitive.microsoft.com/vision/v2.0/read/core/asyncBatchAnalyze?mode=Printed";
+
+            HttpResponseMessage response;
+
+            // Request body
+            byte[] byteData = File.ReadAllBytes(fileName);
+
+            string resp = "";
+            using (var content = new ByteArrayContent(byteData))
+            {
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                response = await client.PostAsync(uri, content);
+                resp = await response.Content.ReadAsStringAsync();
+            }
+            return resp;
+        }
+
+
+
+
+
+
+
+        /// <summary>
+        /// Gets the text visible in the specified image file by using
+        /// the Computer Vision REST API.
+        /// </summary>
+        /// <param name="imageFilePath">The image file with printed text.</param>
+        static async Task MakeOCRRequest(string imageFilePath)
+        {
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+
+                    // Request headers.
+                    client.DefaultRequestHeaders.Add(
+                        "Ocp-Apim-Subscription-Key", subscriptionKey);
+
+                    // Request parameters. 
+                    // The language parameter doesn't specify a language, so the 
+                    // method detects it automatically.
+                    // The detectOrientation parameter is set to true, so the method detects and
+                    // and corrects text orientation before detecting text.
+                    var requestParameters = "language=unk&detectOrientation=true";
+
+                    // Assemble the URI for the REST API method.
+                    var uri = uriBase + "?" + requestParameters;
+
+                    HttpResponseMessage response;
+
+                    // Read the contents of the specified local image
+                    // into a byte array.
+                    var byteData = GetImageAsByteArray(imageFilePath);
+
+                    // Add the byte array as an octet stream to the request body.
+                    using (ByteArrayContent content = new ByteArrayContent(byteData))
+                    {
+                        // This example uses the "application/octet-stream" content type.
+                        // The other content types you can use are "application/json"
+                        // and "multipart/form-data".
+                        content.Headers.ContentType =
+                            new MediaTypeHeaderValue("application/octet-stream");
+
+                        // Asynchronously call the REST API method.
+                        response = await client.PostAsync(uri, content);
+                    }
+
+                    // Asynchronously get the JSON response.
+                    var contentString = await response.Content.ReadAsStringAsync();
+
+                    // Display the JSON response.
+                    Console.WriteLine("\nResponse:\n\n{0}\n",
+                        JToken.Parse(contentString).ToString());
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("\n" + e.Message);
+            }
+        }
+
+        /// <summary>
+        /// Returns the contents of the specified file as a byte array.
+        /// </summary>
+        /// <param name="imageFilePath">The image file to read.</param>
+        /// <returns>The byte array of the image data.</returns>
+        static byte[] GetImageAsByteArray(string imageFilePath)
+        {
+            // Open a read-only file stream for the specified file.
+            using (FileStream fileStream =
+                new FileStream(imageFilePath, FileMode.Open, FileAccess.Read))
+            {
+                // Read the file's contents into a byte array.
+                using (var binaryReader = new BinaryReader(fileStream))
+                {
+                    return binaryReader.ReadBytes((int)fileStream.Length);
+                }
+            }
+        }
+
         static void Main(string[] args)
         {
+            var currentDirectory = @"C:\Development\pdf\"; // AppDomain.CurrentDomain.BaseDirectory;
+            var searchPath = currentDirectory; //  currentDirectory + "pdf";
+            var outPath = currentDirectory; // currentDirectory + "image";
+
+            
+
+            foreach (var imagefilename in Directory.GetFiles(outPath, "*.png", SearchOption.TopDirectoryOnly))
+            {
+
+                //var imagefilenameString = MakeRequest(imagefilename).ConfigureAwait(true);                 
+                //Console.WriteLine(imagefilenameString);
+                //Get the path and filename to process from the user.
+
+                Console.WriteLine("Optical Character Recognition:");
+                Console.Write("Enter the path to an image with text you wish to read: ");
+                var imageFilePath = imagefilename;
+
+
+                if (File.Exists(imageFilePath))
+                {
+                    // Call the REST API method.
+                    Console.WriteLine("\nWait a moment for the results to appear.\n");
+                    MakeOCRRequest(imageFilePath).Wait();
+                }
+                else
+                {
+                    Console.WriteLine("\nInvalid file path");
+                }
+
+
+            }
+            Console.WriteLine("All done.  Press any key to continue.");
+            Console.ReadLine();
+
+
             /*
-            var proc1 = new ProcessStartInfo();
-            string Command;
-            proc1.UseShellExecute = true;
-            Command = @"ipconfig";
-            proc1.WorkingDirectory = @"C:\Windows\System32";
-            proc1.FileName = @"C:\Windows\System32\cmd.exe";
-            /// as admin = proc1.Verb = "runas";
-            proc1.Arguments = "/k " + Command;
-            proc1.WindowStyle = ProcessWindowStyle.Maximized;
-            Process.Start(proc1);
+            foreach (var filename in Directory.GetFiles(searchPath, "*.pdf", SearchOption.TopDirectoryOnly))
+            {
+
+                // Read in all the images and convert to text creating one big text string
+                string ocrText = string.Empty;
+                Console.WriteLine("Extracting text from image...");
+                foreach (var imagefilename in Directory.GetFiles(outPath, "*.png", SearchOption.TopDirectoryOnly))
+                {
+                    OcrResults ocr = vision.RecognizeText(imagefilename);
+                    ocrText += vision.GetRetrieveText(ocr);
+                    //File.Delete(imagefilename);
+                }
+
+                // Take the resulting orcText and upload to a new Azure Search Index
+                // It is highly recommended that you upload documents in batches rather 
+                // individually like is done here
+                if (ocrText.Length > 0)
+                {
+                    Console.WriteLine("Uploading extracted text to Azure Search...");
+                    string fileNameOnly = System.IO.Path.GetFileName(filename);
+                    string fileId = System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(fileNameOnly));
+                    AzureSearch.UploadDocuments(indexClient, fileId, fileNameOnly, ocrText);
+                }
+            }
             */
 
-            var pdfFilePath = @"C:\Development\azure\OCR\AzureSearchOCR\AzureSearchOCR\AzureSearchOCR\pdf\Thesis_Writing_Guidelines.pdf";
-            var outFilePath = @"C:\Development\azure\OCR\AzureSearchOCR\AzureSearchOCR\AzureSearchOCR\image\Thesis_Writing_Guidelines-%d.png";
+
+            /*
+            var pdfFilePath = @"C:\Development\pdf\Schedule1_387171.pdf";
+            var outFilePath = @"C:\Development\pdf\Schedule1_387171-%d.png";
             var proc1 = new ProcessStartInfo();
             //string Command;
             proc1.UseShellExecute = true;
             //Command = @"ipconfig";
-            proc1.WorkingDirectory = @"C:\Development\azure\OCR\AzureSearchOCR\AzureSearchOCR\AzureSearchOCR\image\";
+            proc1.WorkingDirectory = @"C:\Development\pdf\";
             proc1.FileName = @"C:\Development\azure\OCR\pdf-to-jpg-master\bin\gswin32c.exe";
             var Arguments = "-dNOPAUSE -dBATCH -sDEVICE=png16m -sOutputFile=" + outFilePath + " -r300 -f " + pdfFilePath + " -c quit";
-
             Console.WriteLine("Arguments: ["+ Arguments + "]");
             /// as admin = proc1.Verb = "runas";
             proc1.Arguments = Arguments;
             proc1.WindowStyle = ProcessWindowStyle.Maximized;
             Process.Start(proc1);
-
             Console.WriteLine("All done.  Press any key to continue.");
             Console.ReadLine();
-
-            /*
-            GetImagesFromPdf();
-            Console.WriteLine("Done");
-            return;
             */
 
-
             /*
-            var searchPath = "pdf";
-            var outPath = "image";
+            var currentDirectory = AppDomain.CurrentDomain.BaseDirectory;
+
+            var searchPath = currentDirectory + "pdf";
+            var outPath = currentDirectory + "image";
 
             // Note, this will create a new Azure Search Index for the OCR text
             Console.WriteLine("Creating Azure Search index...");
@@ -270,6 +444,7 @@ namespace AzureSearchOCR
 
             Console.WriteLine("All done.  Press any key to continue.");
             Console.ReadLine();
+
             */
 
         }
