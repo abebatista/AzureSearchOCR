@@ -75,7 +75,7 @@ namespace AzureSearchOCR
 
 
         // Replace <Subscription Key> with your valid subscription key.
-        const string subscriptionKey = "0859d36e0a604c2296438eac1fe430ab";
+        const string subscriptionKey = "fb0555fe4eff4fddaa4ace6b1f7c8cbe";
 
         // You must use the same Azure region in your REST API method as you used to
         // get your subscription keys. For example, if you got your subscription keys
@@ -85,8 +85,9 @@ namespace AzureSearchOCR
         // Free trial subscription keys are generated in the "westus" region.
         // If you use a free trial subscription key, you shouldn't need to change
         // this region.
-        const string uriBase =
-            "https://eastus.api.cognitive.microsoft.com/vision/v2.0/ocr";
+        const string uriBase = "https://eastus2.api.cognitive.microsoft.com/vision/v2.0/ocr";
+
+        /*
 
         private static void CreateImageFromPage(SolidFramework.Pdf.Plumbing.PdfPage page, int dpi, string filename, int pageIndex, string extension, System.Drawing.Imaging.ImageFormat format)
         {
@@ -151,45 +152,7 @@ namespace AzureSearchOCR
 
                 PdfToPng(pdfFile, fileName, outPath);
 
-
-                /*
-                FileStream fs = new FileStream(pdf_filename, FileMode.Open, FileAccess.Read);
-                PdfFixedDocument doc = new PdfFixedDocument(fs);
-                PdfPageRenderer renderer = new PdfPageRenderer(doc.Pages[0]);
-                PdfRendererSettings settings = new PdfRendererSettings();
-                settings.DpiX = settings.DpiY = 96;
-                PdfArgbIntRenderingSurface rs = renderer.CreateRenderingSurface<PdfArgbIntRenderingSurface>(settings.DpiX, settings.DpiY);
-                settings.RenderingSurface = rs;
-                renderer.ConvertPageToImage(settings);
-                WriteableBitmap wb = new WriteableBitmap(rs.Width, rs.Height);
-                Array.Copy(rs.Bitmap, wb.Pixels, rs.Bitmap.Length);
-                */
-
-                /*
-                byte[] data = null;
-                FileStream fs = new FileStream(pdf_filename, FileMode.Open, FileAccess.Read);
-                BinaryReader br = new BinaryReader(fs);
-                // Read the image into the byte variable
-                data = br.ReadBytes((int)fs.Length);
-                br.Close();
-                fs.Close();
-                */
-
-                /*
-                var images = PdfImageExtractor.ExtractImages(filename);
-                Console.WriteLine("{0} images found.", images.Count);
-                Console.WriteLine();
-                var directory = System.IO.Path.GetDirectoryName(filename);
-                foreach (var name in images.Keys)
-                {
-                    //if there is a filetype save the file
-                    if (name.LastIndexOf(".") + 1 != name.Length)
-                    {
-                        var filePath = System.IO.Path.Combine(outPath, name);
-                        images[name].Save(filePath);
-                    }
-                }
-                */
+                
             }
         }
 
@@ -217,13 +180,12 @@ namespace AzureSearchOCR
             }
             return resp;
         }
+        */
 
 
 
-
-
-
-
+        const string pageOne = "https://bitnamieastus2symoyo.blob.core.windows.net/documentscontainer/1636959454949373196_fd4b3eaa-846e-4e5b-9149-bcc445a033d7.png";
+        const string pageTwo = "https://bitnamieastus2symoyo.blob.core.windows.net/documentscontainer/1636959454975845655_cd64ad89-51e5-4213-81e4-ff25764263e9.png";
         /// <summary>
         /// Gets the text visible in the specified image file by using
         /// the Computer Vision REST API.
@@ -233,49 +195,67 @@ namespace AzureSearchOCR
         {
             try
             {
-                using (HttpClient client = new HttpClient())
+                HttpClient client = new HttpClient();
+
+                // Request headers.
+                client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+
+                // Request parameters. 
+                // The language parameter doesn't specify a language, so the 
+                // method detects it automatically.
+                // The detectOrientation parameter is set to true, so the method detects and
+                // and corrects text orientation before detecting text.
+                //string requestParameters = "language=unk&detectOrientation=true";
+
+                // Assemble the URI for the REST API method.
+                string uri = "https://eastus.api.cognitive.microsoft.com/vision/v2.0/recognizeText?mode=Printed";
+
+                HttpResponseMessage response;
+
+                // Read the contents of the specified local image
+                // into a byte array.
+                byte[] byteData = GetImageAsByteArray(imageFilePath);
+
+                // Add the byte array as an octet stream to the request body.
+                using (ByteArrayContent content = new ByteArrayContent(byteData))
                 {
+                    // This example uses the "application/octet-stream" content type.
+                    // The other content types you can use are "application/json"
+                    // and "multipart/form-data".
+                    content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
 
-                    // Request headers.
-                    client.DefaultRequestHeaders.Add(
-                        "Ocp-Apim-Subscription-Key", subscriptionKey);
-
-                    // Request parameters. 
-                    // The language parameter doesn't specify a language, so the 
-                    // method detects it automatically.
-                    // The detectOrientation parameter is set to true, so the method detects and
-                    // and corrects text orientation before detecting text.
-                    var requestParameters = "language=unk&detectOrientation=true";
-
-                    // Assemble the URI for the REST API method.
-                    var uri = uriBase + "?" + requestParameters;
-
-                    HttpResponseMessage response;
-
-                    // Read the contents of the specified local image
-                    // into a byte array.
-                    var byteData = GetImageAsByteArray(imageFilePath);
-
-                    // Add the byte array as an octet stream to the request body.
-                    using (ByteArrayContent content = new ByteArrayContent(byteData))
-                    {
-                        // This example uses the "application/octet-stream" content type.
-                        // The other content types you can use are "application/json"
-                        // and "multipart/form-data".
-                        content.Headers.ContentType =
-                            new MediaTypeHeaderValue("application/octet-stream");
-
-                        // Asynchronously call the REST API method.
-                        response = await client.PostAsync(uri, content);
-                    }
-
-                    // Asynchronously get the JSON response.
-                    var contentString = await response.Content.ReadAsStringAsync();
-
-                    // Display the JSON response.
-                    Console.WriteLine("\nResponse:\n\n{0}\n",
-                        JToken.Parse(contentString).ToString());
+                    // Asynchronously call the REST API method.
+                    response = await client.PostAsync(uri, content);
                 }
+
+                // Asynchronously get the JSON response.
+                string contentString = await response.Content.ReadAsStringAsync();
+
+                // Display the JSON response.
+                Console.WriteLine("\nResponse:\n\n{0}\n",
+                    JToken.Parse(contentString).ToString());
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("\n" + e.Message);
+            }
+        }
+
+        static async Task GetOCROperationResult(string url)
+        {
+            try
+            {
+                HttpClient client = new HttpClient();
+
+                // Request headers.
+                client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", subscriptionKey);
+
+                HttpResponseMessage response = await client.GetAsync(url);
+
+                string contentString = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine("\nResponse:\n\n{0}\n", JToken.Parse(contentString).ToString());
+
             }
             catch (Exception e)
             {
@@ -295,20 +275,19 @@ namespace AzureSearchOCR
                 new FileStream(imageFilePath, FileMode.Open, FileAccess.Read))
             {
                 // Read the file's contents into a byte array.
-                using (var binaryReader = new BinaryReader(fileStream))
-                {
-                    return binaryReader.ReadBytes((int)fileStream.Length);
-                }
+                BinaryReader binaryReader = new BinaryReader(fileStream);
+                return binaryReader.ReadBytes((int)fileStream.Length);
             }
         }
 
         static void Main(string[] args)
         {
-            var currentDirectory = @"C:\Development\pdf\"; // AppDomain.CurrentDomain.BaseDirectory;
-            var searchPath = currentDirectory; //  currentDirectory + "pdf";
-            var outPath = currentDirectory; // currentDirectory + "image";
+            //GetOCROperationResult("https://eastus.api.cognitive.microsoft.com/vision/v2.0/textOperations/64ddb515-8fe9-490d-8cd2-a940389982e0");
 
             
+            var currentDirectory = @"C:\TEMP\"; // AppDomain.CurrentDomain.BaseDirectory;
+            var searchPath = currentDirectory; //  currentDirectory + "pdf";
+            var outPath = currentDirectory; // currentDirectory + "image";
 
             foreach (var imagefilename in Directory.GetFiles(outPath, "*.png", SearchOption.TopDirectoryOnly))
             {
@@ -335,6 +314,8 @@ namespace AzureSearchOCR
 
 
             }
+            
+
             Console.WriteLine("All done.  Press any key to continue.");
             Console.ReadLine();
 
